@@ -7,6 +7,8 @@ const app = express();
 const http = require("http");
 const PORT = process.env.PORT || process.env.SERVER_PORT
 const cookieParser = require("cookie-parser");
+const path = require('path');   //The path module
+const fs = require("fs");
 // const cors = require('cors');
 
 // To allow CORS
@@ -23,7 +25,18 @@ app.use(express.urlencoded({extended:true}));
 //To allow Cookies
 app.use(cookieParser());
 
-// app.use(cors());
+
+// Api Docs
+app.get("/", (req, res) =>  {
+    fs.readFile('api/docs/apiDocs.json', (err, data) => {
+        if(err) {
+            res.status(400).json({error:err})
+        }
+        const docs = JSON.parse(data);  //We have to parse the data because it is a buffer, JSON.parse converts into JSON a readable format.
+        console.log("THe docs", docs);
+        res.json(docs);
+    })
+})
 
 //Routes
 // app.use('/', require("./controllers/auth"));
@@ -31,6 +44,13 @@ app.use('/api', require("./controllers/home"));
 app.use('/api', require("./controllers/user"));
 app.use('/api', require("./controllers/project"));
 
+
+// To show public files/Files from uploads folder
+app.use("/api/uploads", express.static('api/uploads'));
+// app.use("/api/uploads", express.static('uploads'));      //Would use when i upload to cloudinary
+console.log("PATH ", path.join(__dirname, '/api/uploads'));
+// app.use(express.static(path.join(__dirname, 'uploads')))
+// app.use("/uploads", express.static('uploads'));
 
 
 //Invalid Route     //NB: using app.use instead of app.get/post handles all wrong requests and throws the message

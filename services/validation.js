@@ -1,9 +1,22 @@
 //ERROR HANDLING
 const { check, body, validationResult } = require("express-validator");
+const User = require("../models/user");
+const { getUserById, authenticate } = require("./user");
 
 
 const userSignupValidator = () => {
   return [
+    //Check that email isn't taken
+    check("email").custom(async(value) => {
+      let userExist = await User.findOne({'email':value})   
+      if(userExist!==null) {
+        console.log("The User already exists");
+        //Return a Promise.reject() because the validation works and should throw an error message. Also, custom validators return promises for async functions
+       return Promise.reject()
+      }
+    
+    }).withMessage("Email is taken! If it belongs to you, please login!"),
+     
     //First name and lastname is not null and is between 4-10 characters
     body("firstname", "First Name is required").trim().notEmpty().isLength({ min: 3 }),
     body("lastname", "Last Name is required").trim().notEmpty().isLength({ min: 3 }),
@@ -19,13 +32,22 @@ const userSignupValidator = () => {
       .isLength({ min: 8 })
       .withMessage("Password must be atleast 8 characters long")
     //   .matches(/\d/)
-    //   .matches(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#?><\$%\^&\*])/)
-      .matches(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])/)
-      .withMessage("Password must be Capitalized and alphanumeric.(e.g. PaS$@WO123D)."),
-    body("matricNumber", "Matric Number is required").notEmpty(),
+      .matches(/^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/)
+      .withMessage("Password must be a combination of at least one upper and lower case letter, one symbol and one number (e.g. PaS$@WO123D)."),
+    body("matricNumber", "Matric Number is required").trim().notEmpty(),
   ];
 };
 
+
+const loginValidator = (req, res, next) => {
+  const { email, password } = req.body;
+  if(!(email && password)) {
+    return res.status(400).json({error: "Please Login with valid email and password"})
+  } else {
+    console.log("Details from Login form", req.body)
+    next();
+  }
+}
 
 const createProjectValidator = () => {
   return [
@@ -41,6 +63,63 @@ const createProjectValidator = () => {
     // body("authors", "Enter Project Author(s) rightly. No whitespaces or incorrect characters allowed!").custom(value => value.trim().length !== 0).matches(/[a-zA-Z]/),
     body("tags","Enter Project tag(s) separated with a #").trim().notEmpty().matches(/[a-zA-Z][a-zA-Z]/)    //Taga must contain atleast 2 letters
 
+  ]
+}
+
+const updateProfileValidator = () => {
+  return [
+    body("firstname", "First Name is required").trim().notEmpty().isLength({ min: 3 }),
+    body("lastname", "Last Name is required").trim().notEmpty().isLength({ min: 3 }),
+    body("email", "Email is required").notEmpty(),
+    body("email")
+      .isEmail()
+      .withMessage("Email must be valid containing @ and a domain (e.g .com) ")
+      .isLength({ min: 10 }),
+    body("matricNumber", "Matric Number is required").trim().notEmpty(), 
+    body("graduationYear", "Please Select your Graduation Year").notEmpty(),
+    body("program", "Please Select your program")
+  ]
+}
+
+const updatePasswordValidator = () => {
+
+  return [
+    body("currentPassword", "Please enter current password").trim().notEmpty(),
+    //Check that current Password is correct
+    check("currentPassword").custom(async (value, {req}) => {
+
+      const { id } = req.params;
+      const user = await getUserById(id);
+      const { email } = user;
+      
+      let check = await authenticate(email, value);
+      console.log("Check ", check)
+
+      if(check[0]==false) {
+        console.log("Current password is incorrect");
+        return Promise.reject()
+      }
+
+    }).withMessage("Current Password is incorrect"),
+    body("newPassword", "New password can not be empty").trim().notEmpty(),
+    body("confirmNewPassword", "Please confirm new password").trim().notEmpty(),
+    check("confirmNewPassword").custom((value, {req} ) => {
+      console.log("FROM Validator req body", req.body)
+      const { newPassword } = req.body
+ 
+      if(value===newPassword) {
+        console.log("Passwords are the same.. Validation passed", value===newPassword);
+        return true;
+      } else {
+        console.log("Passwords must be the same.. Validation test failed", value===newPassword);
+        return false;
+        // return Promise.reject()    //return false or return Promise.reject() would both work since this isn't an async function
+      }
+    })
+    .withMessage("Passwords must match!!"),
+    check("confirmNewPassword")
+    .isStrongPassword({ minLength:8, minLowercase:1, minUppercase:1, minNumbers:1})
+    .withMessage("New Password must be strong - a combination of at least one upper and lower case letter, one symbol and one number (e.g. PaS$@WO123D)."),
   ]
 }
 
@@ -65,5 +144,8 @@ const validate = (req, res, next) => {
 module.exports = {
   userSignupValidator,
   validate,
-  createProjectValidator
+  loginValidator,
+  createProjectValidator,
+  updateProfileValidator,
+  updatePasswordValidator
 };

@@ -1,5 +1,5 @@
 const Project = require("../models/project");
-const { translateError } = require("../models/mongo_helper");
+const { translateError } = require("./mongo_helper");
 
 /* Create new Project */
 const createProject = async ({ name, abstract, authors, tags, createdBy}) => {
