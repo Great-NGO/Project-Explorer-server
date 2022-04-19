@@ -49,6 +49,16 @@ const loginValidator = (req, res, next) => {
   }
 }
 
+const forgotPasswordValidator = (req, res, next) => {
+  const { email } = req.body;
+  if(!(email) || email.includes('@')===false) {
+    return res.status(400).json({error: "Please enter your email! Email can't be empty and must be valid"})
+  } else {
+    console.log("Details from Login form", req.body)
+    next();
+  }
+}
+
 const createProjectValidator = () => {
   return [
     //Name, abstract must not be empty
@@ -123,6 +133,29 @@ const updatePasswordValidator = () => {
   ]
 }
 
+const resetPasswordValidator = () => {
+  return [
+    body("newPassword", "New password can not be empty").trim().notEmpty(),
+    body("confirmNewPassword", "Please confirm new password").trim().notEmpty(),
+    check("confirmNewPassword").custom((value, {req} ) => {
+      console.log("FROM Validator req body", req.body)
+      const { newPassword } = req.body
+      if(value===newPassword) {
+        console.log("Passwords are the same.. Validation passed", value===newPassword);
+        return true;
+      } else {
+        console.log("Passwords must be the same.. Validation test failed", value===newPassword);
+        return false;
+        // return Promise.reject()    //return false or return Promise.reject() would both work since this isn't an async function
+      }
+    })
+    .withMessage("Passwords must match!!"),
+    check("confirmNewPassword")
+    .isStrongPassword({ minLength:8, minLowercase:1, minUppercase:1, minNumbers:1})
+    .withMessage("New Password must be strong - a combination of at least one upper and lower case letter, one symbol and one number (e.g. PaS$@WO123D)."),
+  ]
+}
+
 
 const validate = (req, res, next) => {
   const errors = validationResult(req);
@@ -147,5 +180,7 @@ module.exports = {
   loginValidator,
   createProjectValidator,
   updateProfileValidator,
-  updatePasswordValidator
+  updatePasswordValidator,
+  forgotPasswordValidator,
+  resetPasswordValidator
 };

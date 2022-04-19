@@ -4,13 +4,14 @@ const express = require('express');
 const User = require("../models/user");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const { userSignupValidator, updateProfileValidator, validate, updatePasswordValidator, loginValidator } = require('../services/validation');
+const { userSignupValidator, updateProfileValidator, validate, updatePasswordValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator } = require('../services/validation');
 
 //Auth middleware
 const authorize = require("../middleware/auth");
 const { upload } = require('../services/upload');
 const fs = require('fs');
-const { getUserById, updateUser, authenticate, encryptPassword, updateUserPassword, createUser } = require('../services/user');
+const { getUserById, updateUser, authenticate, encryptPassword, updateUserPassword, createUser, FindUserByEmail } = require('../services/user');
+const { sendResetPwdMail } = require('../services/sendMail');
 
 
 // To get a specific user details
@@ -180,9 +181,49 @@ router.put('/editProfile/password/:id', authorize, updatePasswordValidator(), va
     const { confirmNewPassword } = req.body;
    
     const tryUpdate = await updateUserPassword(id, confirmNewPassword)
-    console.log("UPdate tried  ", tryUpdate)
+    console.log("Edit user password  ", tryUpdate)
 
     res.json({message: "Password updated successfully", status: "Update OK"})
+})
+
+router.post('/forgotPassword', forgotPasswordValidator, async( req, res) => {
+    console.log(req.body);
+
+    const { email } = req.body;
+
+    const check = await FindUserByEmail(email);
+    console.log("check ", check);
+
+    if (check[0] ==true) {
+        const { firstname, _id } = check[1];
+        let userId = _id;
+        console.log(`{${email} \n${firstname} \n${userId}}`)
+        // sendResetPwdMail(email, firstname, userId);
+        res.json({message: "A reset password link has been sent to your email", status: "OK"})
+    } 
+    else {
+        return res.status(400).json({error: check[1]})
+    }
+
+})
+
+
+router.put('/resetPassword/:id', resetPasswordValidator(), validate, async (req, res) => {
+    let {id} = req.params;
+    console.log('From Reset password ', req.body);
+
+    const { confirmNewPassword } = req.body;
+   
+    const tryUpdate = await updateUserPassword(id, confirmNewPassword)
+    console.log("Reset user password ", tryUpdate)
+
+    if(tryUpdate[0] === true) {
+        res.json({message: "Password reset successfully", status: "Reset OK"})
+    }
+    else {
+        return res.status(400).json({errors: ["OOPs! Something went wrong. Please try again later."]})
+    }
+
 })
 
 module.exports = router;

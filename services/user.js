@@ -76,8 +76,38 @@ const updateUser = async (id, fields) => await User.findByIdAndUpdate(id, fields
 
 /* Update User Password */
 const updateUserPassword = async(id, password) => {
-  return await User.findByIdAndUpdate(id, {password: await encryptPassword(password)}, {new: true})
+  try {
+    return [true, await User.findByIdAndUpdate(id, {password: await encryptPassword(password)}, {new: true}) ]
+
+  } catch (error) {
+      console.log(error);
+      return [false, "Something went wrong"]  
+  }
 }
+
+
+/* Get the current url */
+//NB: NODE_ENV specifies the environment in which an application is running
+const getUrl = () => {
+  console.log(process.env.NODE_ENV);
+  return process.env.NODE_ENV === "development" ? "http://localhost:4000" : "http://liveversionurl"
+}
+
+/* Get user by email */
+const FindUserByEmail = async (email) => {
+  // const user = await User.findOne ({'email':email});
+  const user = await User.findOne ({email});
+  if (user) {
+    return [true, user]
+  }
+  else {
+    return [false, "User with that email doesn't exist"]
+  }
+}
+
+
+
+
 
   module.exports = {
       createUser,
@@ -85,5 +115,7 @@ const updateUserPassword = async(id, password) => {
       updateUser,
       authenticate,
       encryptPassword,
-      updateUserPassword
+      updateUserPassword,
+      getUrl,
+      FindUserByEmail
   }
