@@ -28,8 +28,24 @@ const getUserById = async (id) => {
   
   };
 
+  /* Return user with specified id */
+const findUserById = async (id) => {
+  try {
+    const user = await User.findById(id);
+    if(user !== null) {
+        return [true, user];
+    }
+    else {
+        return [false, "User doesn't exist. It is null and/or has been deleted."];
+    }
+} catch (error) {
+    console.log(translateError(error));
+    return [false, translateError(error)];
+}
+}
+
 /* Create new User */
-const createUser = async ({ firstname, lastname, email, password, matricNumber, program, graduationYear}) => {
+const createUser = async ({ firstname, lastname, email, password, matricNumber, program, graduationYear, accountVerified, profilePicture, googleID}) => {
   try {
     let user = new User({
       firstname,
@@ -38,7 +54,10 @@ const createUser = async ({ firstname, lastname, email, password, matricNumber, 
       password: await encryptPassword(password),
       matricNumber,
       program,
-      graduationYear
+      graduationYear,
+      accountVerified,
+      profilePicture,
+      googleID
 
     })
 
@@ -117,5 +136,6 @@ const FindUserByEmail = async (email) => {
       encryptPassword,
       updateUserPassword,
       getUrl,
-      FindUserByEmail
+      FindUserByEmail,
+      findUserById
   }

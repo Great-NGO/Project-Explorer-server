@@ -7,11 +7,6 @@ const UserSchema = new Schema(
   {
     facebookID: { type: String, unique: true },
     googleID: { type: String, unique: true },
-    status: {
-      type: String,
-      default: "Inactive",
-      enum: { values: ["Inactive", "Active"] },
-    },
     accountVerified: {
       type: Boolean,
       default: false,

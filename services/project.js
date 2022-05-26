@@ -45,8 +45,13 @@ const getAllProjects = async() => {
 /* Return a Project with Specified id */
 const getProjectById = async(id) => {
     try {
-        const project = await Project.findById(id).populate(`createdBy`);
-        return project
+        // const project = await Project.findById(id).populate({ path:"createdBy", populate: [{path: "_id"}, {path: "firstname"}, {path: "lastname"}, {path: "email"}] });
+        const project = await Project.findById(id).populate([{path: "createdBy", select:"_id firstname lastname email profilePicture"}]);
+        if(project !== null) {
+            return [true, project]
+        } else {
+            
+        }
     } catch (error) {
         console.log(error);
         return translateError(error)

@@ -39,7 +39,7 @@ app.get("/", (req, res) =>  {
 })
 
 //Routes
-// app.use('/', require("./controllers/auth"));
+app.use('/api', require("./controllers/auth"));
 app.use('/api', require("./controllers/home"));
 app.use('/api', require("./controllers/user"));
 app.use('/api', require("./controllers/project"));
@@ -58,7 +58,6 @@ app.use('*', (req, res) => {
     res.status(404).send({error: "Route does not exist"})
 })
 
-
 //Server setup
 const server = http.createServer(app)
 //If any error in starting server
@@ -70,7 +69,3 @@ server.on('error', (err) => {
 server.listen(PORT, () => {
     console.log(`Server listening on PORT ${PORT}`);
 })
-
-// app.listen(PORT, () => {
-//     console.log(`Server listening on Port ${PORT}`);
-// })

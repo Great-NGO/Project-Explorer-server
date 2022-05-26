@@ -1,7 +1,8 @@
 //ERROR HANDLING
 const { check, body, validationResult } = require("express-validator");
 const User = require("../models/user");
-const { getUserById, authenticate } = require("./user");
+const { getUserById, authenticate, FindUserByEmail } = require("./user");
+const {getGradYears, getPrograms} = require("../services/school");
 
 
 const userSignupValidator = () => {
@@ -78,6 +79,21 @@ const createProjectValidator = () => {
 
 const updateProfileValidator = () => {
   return [
+    //Check that email isn't taken
+    check("email").custom(async(value, {req}) => {
+      const { id } = req.params;
+      let userExist = await FindUserByEmail(value);
+      console.log("Exists? ", userExist)
+      if(userExist[1]._id == id) {
+        console.log("User's email didn't change. Still the same email for User. ", userExist[1]._id == id);
+      } 
+      if(userExist[0]!==false && userExist[1]._id != id) {
+        console.log("The User already exists");
+        return Promise.reject()
+      }
+          
+    }).withMessage("Another User with that email already exists."),
+           
     body("firstname", "First Name is required").trim().notEmpty().isLength({ min: 3 }),
     body("lastname", "Last Name is required").trim().notEmpty().isLength({ min: 3 }),
     body("email", "Email is required").notEmpty(),
@@ -156,6 +172,33 @@ const resetPasswordValidator = () => {
   ]
 }
 
+const continueSignupValidator = () => {
+  return [
+    body("password", "Please enter your Password.").trim().notEmpty(),
+    check("password")
+    .isStrongPassword({ minLength:8, minLowercase:1, minUppercase:1, minNumbers:1})
+    .withMessage("Password must be strong - a combination of at least one upper and lower case letter, one symbol and one number (e.g. PaS$@WO123D)."),
+    body("matricNumber", "Please Enter your correct matric Number").trim().notEmpty(),
+    body("graduationYear", "Please Select your Graduation Year").notEmpty(),
+    body('graduationYear', "Please Select your Graduation Year").custom((value, {req}) => {
+      const graduationYears = getGradYears();   //To get our array of graduation years
+      console.log("The graduation years from continueSignup validator ",graduationYears);
+      if (!graduationYears.includes(value)) {
+        throw new Error('No Graduation Year selected.');
+      }
+      return true;
+    }),
+    body("program", "Please Select your program").notEmpty(),
+    body('program', "Please Select your Program").custom((value, {req}) => {
+      const programs = getPrograms();   //To get our array of programs
+      if (!programs.includes(value)) {
+        throw new Error('No Program selected.');
+      }
+      return true;
+    })
+  ]
+}
+
 
 const validate = (req, res, next) => {
   const errors = validationResult(req);
@@ -182,5 +225,7 @@ module.exports = {
   updateProfileValidator,
   updatePasswordValidator,
   forgotPasswordValidator,
-  resetPasswordValidator
+  resetPasswordValidator,
+  continueSignupValidator,
+
 };
