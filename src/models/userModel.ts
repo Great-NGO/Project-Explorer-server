@@ -2,6 +2,7 @@
 import mongoose, { model, Schema, Types, Document, InferSchemaType} from "mongoose";
 const { ObjectId } = Schema.Types;
 
+/** IUser - User Model Interface (represents the structure of the User model and defines the properties and their types for a User document)*/
 interface IUser extends Document {
     googleId: string,
     accountVerified: boolean,
@@ -13,7 +14,8 @@ interface IUser extends Document {
     program?: string,
     graduationYear?: string,
     profilePicture?: string,
-    profilePicturePublicId ?: string
+    profilePicturePublicId ?: string,
+ 
 }
 
 const UserSchema = new Schema<IUser>(
@@ -37,8 +39,9 @@ const UserSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
+/** TUser - User Model Type (Based on User Schema model inference similar to IUser. It represents the inferred type of the User model based on the schema, capturing its actual schema type and providing the type information for the User model) */
 export type TUser = InferSchemaType<typeof UserSchema>;
 
-const User = model<TUser>("User", UserSchema);
+const User = model<IUser>("User", UserSchema);
 
-export default User;
+export {IUser, User}

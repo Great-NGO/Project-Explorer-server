@@ -7,16 +7,16 @@ interface IComment extends Document {
     projectId: Types.ObjectId,
     text: string,
     type: string,
-    likes: Types.Array<Types.ObjectId>,
+    likes?: Types.Array<Types.ObjectId>,
     date: Date,
     parentCommentId?: Types.ObjectId,
     // replies ?: Types.Array<Types.ObjectId>
 }
 
-// const CommentSchema = new Schema<IComment>(
-const CommentSchema = new Schema(
+const CommentSchema = new Schema<IComment>(
+// const CommentSchema = new Schema(
     {
-        commentAuthorId: { type: ObjectId, required: true, ref: "User" },
+        commentAuthorId: { type: ObjectId, ref: "User" },
         projectId: { type: ObjectId, required: true, ref: "Project" },
         text: { type: String, required: true },
         type: { 
@@ -37,6 +37,6 @@ const CommentSchema = new Schema(
 
 export type TComment = InferSchemaType<typeof CommentSchema>;
 
-const Comment = model<TComment>("CommentSchema", CommentSchema);
+const Comment = model<IComment>("CommentSchema", CommentSchema);
 
-export default Comment;
+export { IComment, Comment };

@@ -12,8 +12,8 @@ interface INotification extends Document {
 }
 
 
-// const NotificationSchema = new Schema <INotification>({
-const NotificationSchema = new Schema({
+const NotificationSchema = new Schema <INotification>({
+// const NotificationSchema = new Schema({
     notificationOwner: { type: ObjectId, ref: "User"},
     notificationMaker: { type: ObjectId, ref: "User" },
     actionType: {
@@ -38,4 +38,4 @@ export type TNotification = InferSchemaType<typeof NotificationSchema>;
 
 const Notification = model<TNotification>("Notification", NotificationSchema);
 
-export default Notification;
+export { INotification, Notification } 

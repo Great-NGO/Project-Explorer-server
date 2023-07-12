@@ -9,8 +9,8 @@ interface IProjectVisit extends Document {
     lastVisited?: Date
 }
 
-// const ProjectVisitSchema = new Schema<ProjectVisitSchema>(
-const ProjectVisitSchema = new Schema(
+const ProjectVisitSchema = new Schema<IProjectVisit>(
+// const ProjectVisitSchema = new Schema(
     {
         projectId: { type: ObjectId, required: true, ref: "Project" },
         userId: { type: ObjectId, required: true, ref: "User" },
@@ -24,4 +24,4 @@ export type TProjectVisit = InferSchemaType<typeof ProjectVisitSchema>;
 
 const ProjectVisit = model<TProjectVisit>("ProjectVisitSchema", ProjectVisitSchema);
 
-export default ProjectVisit;
+export { IProjectVisit, ProjectVisit };

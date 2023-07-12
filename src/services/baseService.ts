@@ -1,10 +1,11 @@
-import { Model, Document, FilterQuery } from "mongoose";
+import { Model, Document, FilterQuery, Types } from "mongoose";
 import { translateError } from "../utils/translateError";
+import { logError } from "../utils/logging";
 
 // Utility Type - Partial<T> makes all the properties in T optional
 // The <T> specifies the type of data being returned - Model array or document e.g. User[] or User
 // type ServiceResponse<T> = [success:boolean, data: T | null, message: string, statusCode: number];
-type ServiceResponse<T> = [
+export type ServiceResponse<T> = [
     success: boolean,
     data: T | null,
     message: string,
@@ -44,11 +45,14 @@ export abstract class BaseService<T extends Document> {
             return [true, foundAll, "All Data returned", { status: 200 }];
 
         } catch (error) {
-            return [false, null, "Failed to get all", { status: 500 }];
+            // return [false, null, "Failed to get all", { status: 500 }];
+            const errResponse = translateError(error, "getting all data");
+            logError("Base Service Get All", errResponse);
+            return errResponse;
         }
     }
 
-    async getById(id: string | number): Promise<ServiceResponse<T>> {
+    async getById(id: Types.ObjectId | string | number): Promise<ServiceResponse<T>> {
         try {
 
             let data = await this.model.findById(id);
@@ -57,7 +61,10 @@ export abstract class BaseService<T extends Document> {
             }
             return [false, null, "Not found.", { status: 404 }];
         } catch (error) {
-            return [false, null, translateError(error)[0], { status: 500 }];
+            const errResponse = translateError(error, "finding data by id");
+            logError("Base Service Get by Id", errResponse);
+            return errResponse;
+
         }
     }
 
@@ -70,7 +77,10 @@ export abstract class BaseService<T extends Document> {
             }
             return [false, null, "Not found.", { status: 404 }];
         } catch (error) {
-            return [false, null, translateError(error)[0], { status: 500 }]
+            // return [false, null, translateError(error)[0], { status: 500 }]
+            const errResponse = translateError(error, "finding data.");
+            logError("Base Service Get One", errResponse);
+            return errResponse;
         }
     }
 
@@ -82,7 +92,10 @@ export abstract class BaseService<T extends Document> {
             }
             return [false, null, 'Failed to create data', { status: 400 }];
         } catch (error) {
-            return [false, null, translateError(error)[0], { status: 500 }];
+            // return [false, null, translateError(error)[0], { status: 500 }];
+            const errResponse = translateError(error, "creating data.");
+            logError("Base Service Create", errResponse);
+            return errResponse;
         }
     }
 
@@ -94,7 +107,10 @@ export abstract class BaseService<T extends Document> {
             }
             return [false, null, 'Update Failed', { status: 400 }];
         } catch (error) {
-            return [false, null, `Failed to update data: ${translateError(error)[0]}`, { status: 500 }];
+            // return [false, null, `Failed to update data: ${translateError(error)[0]}`, { status: 500 }];
+            const errResponse = translateError(error, "updating data");
+            logError("Base Service Update", errResponse);
+            return errResponse;
 
         }
     }
@@ -107,7 +123,10 @@ export abstract class BaseService<T extends Document> {
             }
             return [false, null, 'Resource not found. Delete Failed!', { status: 404 }];
         } catch (error) {
-            return [false, null, `Failed to delete data: ${translateError(error)[0]}`, { status: 500 }];
+            // return [false, null, `Failed to delete data: ${translateError(error)[0]}`, { status: 500 }];
+            const errResponse = translateError(error, "deleting");
+            logError("Base Service Delete", errResponse);
+            return errResponse;
 
         }
     }
@@ -118,8 +137,10 @@ export abstract class BaseService<T extends Document> {
             const data = await this.model.find(query);
             return [true, data, 'Data retrieved successfully', { status: 200 }];
         } catch (error) {
-            return [false, null, `Failed to retrieve data: ${translateError(error)[0]}`, { status: 500 }];
-
+            // return [false, null, `Failed to retrieve data: ${translateError(error)[0]}`, { status: 500 }];
+            const errResponse = translateError(error, "finding data");
+            logError("Base Service findAllByCondition", errResponse);
+            return errResponse;
         }
     }
 
@@ -143,7 +164,10 @@ export abstract class BaseService<T extends Document> {
 
             return [true, paginatedData, "Data returned successfully.", { status: 200 }];
         } catch (error) {
-            return [false, null, `Failed to retrieve data: ${translateError(error)[0]}`, { status: 500 }];
+            // return [false, null, `Failed to retrieve data: ${translateError(error)[0]}`, { status: 500 }];
+            const errResponse = translateError(error, "finding all data");
+            logError("Base Service FindAllPaginated", errResponse);
+            return errResponse;
         }
     }
 
@@ -167,7 +191,10 @@ export abstract class BaseService<T extends Document> {
 
             return [true, paginatedData, "Data returned successfully.", { status: 200 }];
         } catch (error) {
-            return [false, null, `Failed to retrieve data: ${translateError(error)[0]}`, { status: 500 }];
+            // return [false, null, `Failed to retrieve data: ${translateError(error)[0]}`, { status: 500 }];
+            const errResponse = translateError(error, "retrieving data");
+            logError("Base Service findAllByConditionPaginated", errResponse);
+            return errResponse;
             
         }
     }
