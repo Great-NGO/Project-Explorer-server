@@ -2,7 +2,7 @@
 import { Model, Types } from "mongoose";
 
 import { translateError } from "../utils/translateError";
-import { BaseService, ServiceResponse } from "./baseService";
+import { BaseService, TServiceResponse } from "./baseService";
 import { IProject, TProject, Project } from "../models/projectModel";
 
 

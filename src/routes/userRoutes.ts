@@ -4,6 +4,7 @@ import asyncHandler from "../middleware/asyncHandler";
 import { requireSignin } from "../middleware/authMiddleware";
 import { userForgotPasswordValidator, userLoginValidator, userResetPasswordValidator, userSignupValidator, userUpdatePasswordValidator, userUpdateProfileValidator } from "../validators/userValidations";
 import validate from "../middleware/validationMiddleware";
+import { upload } from "../utils/upload";
 
 class UserRoutes {
     public router:Router;
@@ -26,7 +27,11 @@ class UserRoutes {
         this.router.get('/users', asyncHandler(this.userController.getUsers) );
         this.router.get('/user/:id', asyncHandler(this.userController.getUserDetails) );
         this.router.get('/user-profile', requireSignin, asyncHandler(this.userController.getUserDetails) );
-        this.router.put('/edit-profile', requireSignin, userUpdateProfileValidator, validate, asyncHandler(this.userController.editDetails) );
+        
+        // Upload profile picture endpoint
+        const profilePicUploadMiddleware = upload.single('profilePicture');
+        this.router.put('/edit-profile', requireSignin, profilePicUploadMiddleware, userUpdateProfileValidator, validate, asyncHandler(this.userController.editDetails) );
+       
         this.router.put('/edit-password', requireSignin, userUpdatePasswordValidator, validate, asyncHandler(this.userController.editPassword) );
         this.router.put('/remove-profile-picture', requireSignin, asyncHandler(this.userController.removeProfilePicture) );
 

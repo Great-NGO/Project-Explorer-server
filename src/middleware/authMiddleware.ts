@@ -5,8 +5,8 @@ import responseHandler from "../utils/responseHandler";
 import jwt, { Secret } from "jsonwebtoken";
 import { JWT_SECRET_KEY } from "../utils/secrets";
 
-
-interface AuthRequest extends Request {
+/** AuthRequest - Interface definition including the modified request object which includes the user object containing the user id and role if logged in else undefined if logged out. */
+export interface AuthRequest extends Request {
     user?: {
         id: string,
         role: string

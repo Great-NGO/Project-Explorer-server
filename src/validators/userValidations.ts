@@ -33,8 +33,24 @@ const userSignupValidator = [
   body("lastname", "Last Name is required").trim().notEmpty().escape(),
   body("email", "Email is required").isEmail().normalizeEmail(),
   body("password", "Password is required").trim().notEmpty(),
-  body("password", "Password must be strong - must be at least 8 characters long and contain at least 1 uppercase letter and 1 symbol or number").isStrongPassword({ minLength: 8, minUppercase: 1, minNumbers: 1 }),
+  body("password", "Password must be strong - must be at least 8 characters long and contain at least 1 uppercase letter, 1 symbol and 1 number").isStrongPassword({ minLength: 8, minUppercase: 1, minNumbers: 1 }),
   body("matricNumber", "Matric Number is required").trim().notEmpty(),
+  body("graduationYear", "Please Select your Graduation Year").optional().notEmpty(),
+  body('graduationYear', "Please Select your Graduation Year").optional().custom((value, { req }) => {
+    const graduationYears = getGradYears();   //To get our array of graduation years
+    if (!graduationYears.includes(value)) {
+      throw new Error('No Graduation Year selected.');
+    }
+    return true;
+  }),
+  body("program", "Please Select your program").optional().notEmpty(),
+  body('program', "Please Select your Program").optional().custom((value, { req }) => {
+    const programs = getPrograms();   //To get our array of programs
+    if (!programs.includes(value)) {
+      throw new Error('No Program selected.');
+    }
+    return true;
+  }),
   body("confirmPassword", "Please enter your password again").optional().trim().notEmpty(),
   body("confirmPassword").optional().custom((value, { req }) => {
     const { password } = req.body;
@@ -112,8 +128,8 @@ const userUpdatePasswordValidator = [
       return true;
     }
   }).withMessage("New Password can not be the same as old password"),
-  body("confirmNewPassword", "Please confirm your new password").trim().notEmpty(),
-  body("confirmNewPassword").custom((value, { req }) => {
+  body("confirmPassword", "Please confirm your new password").trim().notEmpty(),
+  body("confirmPassword").custom((value, { req }) => {
     const { newPassword } = req.body;
     if (value === newPassword) {
       return true;
@@ -131,8 +147,8 @@ const userResetPasswordValidator = [
   body("token", "Token is required").trim().notEmpty(),
   body("newPassword", "New Password can not be empty").trim().notEmpty(),
   body("newPassword", "New Password must be strong - must contain at least 1 uppercase letter and 1 symbol or number").isStrongPassword({ minLength: 8, minUppercase: 1, minNumbers: 1 }),
-  body("confirmNewPassword", "Please confirm your new password").trim().notEmpty(),
-  body("confirmNewPassword").custom((value, { req }) => {
+  body("confirmPassword", "Please confirm your new password").trim().notEmpty(),
+  body("confirmPassword").custom((value, { req }) => {
     const { newPassword } = req.body;
     if (value === newPassword) {
       return true;
