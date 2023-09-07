@@ -12,8 +12,8 @@ import { body, cookie } from "express-validator";
 const createProjectValidator = [
     //Name, abstract must not be empty
     body("name", "Project name is required").trim().notEmpty(),
-    body("abstract", "Enter a description for your project").trim().notEmpty(),
-    body("abstract", "Project description must contain atleast 50 words").isLength({ min: 50 }),
+    body("abstract", "Enter abstract for your project. (description)").trim().notEmpty(),
+    body("abstract", "Project abstract must contain atleast 50 words").isLength({ min: 50 }),
 
     //Authors and tags 
     body("authors", "Enter Project Author(s) separated with a comma (,) ").trim().notEmpty(),

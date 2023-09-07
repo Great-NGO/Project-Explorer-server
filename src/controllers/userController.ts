@@ -101,7 +101,7 @@ class UserController {
     
     }
 
-    public async editDetails(req: Request, res: Response): Promise<TControllerResponse | any> {
+    public async editDetails(req: AuthRequest, res: Response): Promise<TControllerResponse | any> {
         const check = await UserService.updateProfile(req);
         console.log("User update ", check);
         let [success, data, message, metadata] = check;
